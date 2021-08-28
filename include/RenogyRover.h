@@ -9,8 +9,9 @@
 
 #include <Arduino.h>
 #include <ModbusMaster.h>
-
+#ifndef MODBUS_SERIAL
 #define MODBUS_SERIAL Serial2
+#endif
 
 enum ChargingMode {
     UNDEFINED = -1,
@@ -89,7 +90,7 @@ class RenogyRover {
         RenogyRover();
         RenogyRover(int modbusId);
         ModbusMaster getModbusClient();
-        int begin(int baudrate);
+        void begin(int baudrate);
         const char* getLastModbusError();
 
         int getProductModel(char*& productModel);
@@ -107,6 +108,7 @@ class RenogyRover {
         uint8_t _lastError;
         int _readHoldingRegisters(int base, int length, uint16_t*& values);
         int* _filterZeroes(int16_t arr[], int& size);
+        int8_t _convertSignedMagnitude(uint8_t val);
 };
 
 #endif

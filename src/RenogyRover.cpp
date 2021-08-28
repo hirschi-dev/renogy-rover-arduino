@@ -20,7 +20,7 @@ ModbusMaster RenogyRover::getModbusClient() {
     return _client;
 }
 
-int RenogyRover::begin(int baudrate) {
+void RenogyRover::begin(int baudrate) {
     MODBUS_SERIAL.begin(baudrate, SERIAL_8N1);
     _client.begin(_modbusId, MODBUS_SERIAL);
 }
@@ -45,6 +45,8 @@ const char* RenogyRover::getLastModbusError() {
             return "Response timed out";
         case _client.ku8MBInvalidCRC:
             return "InvalidCRC"; 
+        default:
+            return "Unknown error";
     }
 }
 
@@ -111,8 +113,10 @@ int RenogyRover::getBatteryState(BatteryState* state) {
         state->stateOfCharge = (int16_t) values[0];
         state->batteryVoltage = (int16_t) values[1] * 0.1f;
         state->chargingCurrent = (int16_t) values[2] * 0.01f;
-        state->batteryTemperature = (int8_t) values[3];
-        state->controllerTemperature = (int8_t) (values[3] >> 8);
+
+        // temperatures are in signed magnitude notation
+        state->batteryTemperature = _convertSignedMagnitude(values[3]);
+        state->controllerTemperature = _convertSignedMagnitude(values[3] >> 8);
     }
 
     return 1;
@@ -285,4 +289,11 @@ int* RenogyRover::_filterZeroes(int16_t arr[], int& size) {
     }
 
     return result;
+}
+
+int8_t RenogyRover::_convertSignedMagnitude(uint8_t val) {
+    if (val & 0x80) {
+        return -(val & 0x7F);
+    }
+    return val;
 }
