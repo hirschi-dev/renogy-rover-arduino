@@ -9,9 +9,6 @@
 
 #include <Arduino.h>
 #include <ModbusMaster.h>
-#ifndef MODBUS_SERIAL
-#define MODBUS_SERIAL Serial2
-#endif
 
 enum ChargingMode {
     UNDEFINED = -1,
