@@ -87,7 +87,7 @@ class RenogyRover {
         RenogyRover();
         RenogyRover(int modbusId);
         ModbusMaster getModbusClient();
-        void begin(int baudrate);
+        void begin(Stream& serial);
         const char* getLastModbusError();
 
         int getProductModel(char*& productModel);
