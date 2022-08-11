@@ -20,9 +20,8 @@ ModbusMaster RenogyRover::getModbusClient() {
     return _client;
 }
 
-void RenogyRover::begin(int baudrate) {
-    MODBUS_SERIAL.begin(baudrate, SERIAL_8N1);
-    _client.begin(_modbusId, MODBUS_SERIAL);
+void RenogyRover::begin(Stream& serial) {
+    _client.begin(_modbusId, serial);
 }
 
 const char* RenogyRover::getLastModbusError() {
