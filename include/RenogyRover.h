@@ -99,7 +99,7 @@ class RenogyRover {
         int getDayStatistics(DayStatistics* dayStats);
         int getHistoricalStatistics(HistStatistics* histStats);
         int getChargingState(ChargingState* chargingState);
-        int getErrors(FaultCode*& errors, int& numErrors);
+        int getErrors(int& errors);
 
         int setStreetLight(int state);
     private:

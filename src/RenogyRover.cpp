@@ -228,10 +228,10 @@ int RenogyRover::getChargingState(ChargingState* state) {
     return 1;
 }
 
-int RenogyRover::getErrors(FaultCode*& errors, int& numErrors) {
+int RenogyRover::getErrors(int& errors) {
     int registerBase = 0x0121;
     int registerLength = 2;
-    numErrors = 15;
+    //numErrors = 15;
 
     uint16_t* values = new uint16_t[registerLength];
 
@@ -239,15 +239,11 @@ int RenogyRover::getErrors(FaultCode*& errors, int& numErrors) {
         return 0;
     } 
 
-    int16_t* errVals = new int16_t[numErrors];
+    //int16_t* errVals = new int16_t[numErrors];
 
     // 16 lower bits are reserved
     // highest bit is reserved
-    for (int i = 0; i  < 15;  i++) {
-        errVals[i] = values[0] & (1U << i);
-    }
-
-    errors = reinterpret_cast<FaultCode*>(_filterZeroes(errVals, numErrors));
+    errors = (values[0] << 1U) >> 1U;
 
     return 1;
 }
