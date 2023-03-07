@@ -104,7 +104,6 @@ class RenogyRover {
         int _modbusId;
         uint8_t _lastError;
         int _readHoldingRegisters(int base, int length, uint16_t*& values);
-        int* _filterZeroes(int16_t arr[], int& size);
         int8_t _convertSignedMagnitude(uint8_t val);
 };
 

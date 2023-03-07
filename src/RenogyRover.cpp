@@ -57,6 +57,7 @@ int RenogyRover::getProductModel(char*& productModel) {
     productModel = new char[registerLength * 2 + 1];
 
     if (!_readHoldingRegisters(registerBase, registerLength, values)) {
+        delete [] values;
         return 0;
     } else {
         // convert uint16_t to int8_t, 
@@ -70,6 +71,8 @@ int RenogyRover::getProductModel(char*& productModel) {
         productModel[16] = '\0';
         productModel = &productModel[2];
     }
+
+    delete [] values;
     return 1;
 }
 
@@ -84,6 +87,7 @@ int RenogyRover::getPanelState(PanelState* state) {
     uint16_t* values = new uint16_t[registerLength];
 
     if (!_readHoldingRegisters(registerBase, registerLength, values)) {
+        delete [] values;
         return 0;
     } else {
         state->voltage = (int16_t) values[0] * 0.1f;
@@ -91,6 +95,7 @@ int RenogyRover::getPanelState(PanelState* state) {
         state->chargingPower = (int16_t) values[2];
     }
 
+    delete [] values;
     return 1;
 }
 
@@ -107,6 +112,7 @@ int RenogyRover::getBatteryState(BatteryState* state) {
     uint16_t* values = new uint16_t[registerLength];
 
     if (!_readHoldingRegisters(registerBase, registerLength, values)) {
+        delete [] values;
         return 0;
     } else {
         state->stateOfCharge = (int16_t) values[0];
@@ -118,6 +124,7 @@ int RenogyRover::getBatteryState(BatteryState* state) {
         state->controllerTemperature = _convertSignedMagnitude(values[3] >> 8);
     }
 
+    delete [] values;
     return 1;
 }
 
@@ -139,6 +146,7 @@ int RenogyRover::getDayStatistics(DayStatistics* params) {
     uint16_t* values = new uint16_t[registerLength];
 
     if (!_readHoldingRegisters(registerBase, registerLength, values)) {
+        delete [] values;
         return 0;
     } else {
         params->batteryVoltageMinForDay = (int16_t) values[0] * 0.1f;
@@ -153,6 +161,7 @@ int RenogyRover::getDayStatistics(DayStatistics* params) {
         params->powerConsumptionForDay = (int16_t) values[9];
     }
     
+    delete [] values;
     return 1;
 }
 
@@ -171,6 +180,7 @@ int RenogyRover::getHistoricalStatistics(HistStatistics* stats) {
     uint16_t* values = new uint16_t[registerLength];
 
     if (!_readHoldingRegisters(registerBase, registerLength, values)) {
+        delete [] values;
         return 0;
     } else {
         stats->operatingDays = (int16_t) values[0];
@@ -181,11 +191,14 @@ int RenogyRover::getHistoricalStatistics(HistStatistics* stats) {
     registerBase = 0x118;
     registerLength = 8;
 
-    free(values);
+    delete [] values;    
+
     values = new uint16_t[registerLength];
     uint32_t* integers = new uint32_t[registerLength / 2];
 
     if (!_readHoldingRegisters(registerBase, registerLength, values)) {
+        delete [] values;
+        delete [] integers;
         return 0;
     } else {
         int j = 0;
@@ -200,8 +213,8 @@ int RenogyRover::getHistoricalStatistics(HistStatistics* stats) {
         stats->powerConsumed = integers[3] / 10000.0f;
     }
 
-    free(values);
-    free(integers);
+    delete [] values;
+    delete [] integers;
     return 1;
 };
 
@@ -216,6 +229,7 @@ int RenogyRover::getChargingState(ChargingState* state) {
     uint16_t* values  = new uint16_t;
 
     if (!_readHoldingRegisters(registerBase, registerLength, values)) {
+        delete [] values;
         return 0;
     } else {
         state->streetLightState = (*values >> 15) & 1U;
@@ -223,27 +237,26 @@ int RenogyRover::getChargingState(ChargingState* state) {
         state->chargingMode = ChargingMode((uint8_t) *values);
     }
 
-    free(values);
+    delete [] values;
     return 1;
 }
 
 int RenogyRover::getErrors(int& errors) {
     int registerBase = 0x0121;
     int registerLength = 2;
-    //numErrors = 15;
 
     uint16_t* values = new uint16_t[registerLength];
 
     if (!_readHoldingRegisters(registerBase, registerLength, values)) {
+        delete [] values;
         return 0;
     } 
-
-    //int16_t* errVals = new int16_t[numErrors];
 
     // 16 lower bits are reserved
     // highest bit is reserved
     errors = (values[0] << 1U) >> 1U;
 
+    delete [] values;
     return 1;
 }
 
@@ -266,24 +279,6 @@ int RenogyRover::_readHoldingRegisters(int base, int length, uint16_t*& values) 
         }
     }
     return 1;
-}
-
-int* RenogyRover::_filterZeroes(int16_t arr[], int& size) {
-    int* result = new int[size];
-    int ctr = 0;
-
-    for (int i= 0; i < size; i++) {
-        if (arr[i] != 0) {
-            result[ctr++] = arr[i];
-        }
-    }
-
-    if (ctr < size) {
-        realloc(result, ctr * sizeof(int));
-        size = ctr;
-    }
-
-    return result;
 }
 
 int8_t RenogyRover::_convertSignedMagnitude(uint8_t val) {
